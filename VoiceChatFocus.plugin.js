@@ -1,6 +1,6 @@
 /**
  * @name Voice Chat Focus
- * @version 1.0.0
+ * @version 1.0.1
  * @author Z'ark Ashveil
  * @authorId 262113677900120065
  * @authorLink https://github.com/Kawtious
@@ -65,7 +65,7 @@ module.exports = class VoiceChatFocus {
         // User will be unfocused
         if (this.focusedUserId === userId) {
             this.focusedUserId = null;
-            this.unfocus(channelVoiceStates, userId);
+            this.unfocus(channelVoiceStates);
             return;
         }
 
@@ -90,10 +90,8 @@ module.exports = class VoiceChatFocus {
         });
     }
 
-    unfocus(voiceStates, userId) {
+    unfocus(voiceStates) {
         Object.values(voiceStates).forEach(state => {
-            if (state.userId === userId) return;
-
             const isUserMuted = state.userId in this.MediaEngineStore.getSettings().localMutes;
 
             if (!isUserMuted) return;
