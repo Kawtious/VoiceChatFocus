@@ -1,6 +1,6 @@
 /**
  * @name Voice Chat Focus
- * @version 1.1.0
+ * @version 1.1.1
  * @author Z'ark Ashveil
  * @authorId 262113677900120065
  * @authorLink https://github.com/Kawtious
@@ -138,13 +138,24 @@ module.exports = class VoiceChatFocus {
         // Only show if in same voice channel
         if (myVoiceState.channelId !== userVoiceState.channelId) return;
 
-        // TODO: Is there a better way to do this?
-        //  Supposedly there was a hint here, but these links do not work anymore...
-        //  https://docs.betterdiscord.app/api/utils#findintree
-        //  https://docs.betterdiscord.app/plugins/advanced/react#tree-traversal
-        const menu = element.props.children[0].props.children[4].props.children[0];
+        const menu = BdApi.Utils.findInTree(
+            element,
+            // - element.props.children[0].props.children[4].props.children[0]
+            // The context menu group for self-mute and self-deafen is behind an array (children[0]),
+            //  and I don't know how to walk to it. "props" and "children" aren't of much use to find
+            //  the array that contains the group itself, so I look for an array that contains an item
+            //  with the key "self-mute" and that is also inside another array
+            //  
+            prop =>
+                Array.isArray(prop) &&
+                prop.some(prop2 =>
+                    Array.isArray(prop2) &&
+                    prop2.some(e => e.key === "self-mute")
+                ),
+            { walkable: ["props", "children"] }
+        );
 
-        menu.push(
+        menu[0].push(
             BdApi.ContextMenu.buildItem(
                 {
                     label: this.focusedUserId !== context.user.id ? "Focus User" : "Unfocus User",
